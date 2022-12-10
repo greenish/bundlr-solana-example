@@ -2,7 +2,77 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
+import WebBundlr from "@bundlr-network/client/build/web"
+import { PublicKey } from "@solana/web3.js";
+import arrayBufferToBase64 from './arrayBufferToBase64';
+import base64ToArrayBuffer from './base64ToArrayBuffer';
+
+if (!process.env.NEXT_PUBLIC_BUNDLR_NETWORK_NODE || !process.env.NEXT_PUBLIC_SOLANA_PUBLIC_KEY) {
+  throw new Error("Missing env variables.");
+}
+
+const bundlrNode = process.env.NEXT_PUBLIC_BUNDLR_NETWORK_NODE;
+const publicKey = new PublicKey(process.env.NEXT_PUBLIC_SOLANA_PUBLIC_KEY);
+
 export default function Home() {
+
+  const uploadDataBundlr = async () => {
+    // mock provider
+    const provider = {
+      publicKey,
+      signMessage: () => {
+        return "serverSignature";
+      }
+    };
+    const bundlr = new WebBundlr(bundlrNode, "solana", provider);
+    await bundlr.ready();
+
+    const transaction = bundlr.createTransaction("Hello");
+
+    transaction.rawOwner = publicKey.toBuffer();
+
+    console.log("valid", await transaction.isValid());
+
+    // get signature data
+    const signatureData = await transaction.getSignatureData();
+
+    // get signed signature
+    const signed = await fetch("/api/signBundlrTransaction", {
+      method: "POST",
+      body: JSON.stringify({
+        signatureData: arrayBufferToBase64(signatureData),
+        size: transaction.size
+      })
+    });
+    const json = await signed.json();
+    const serverPubkey = new PublicKey(json.pubkey);
+
+    console.log(publicKey.toString(), serverPubkey.toString());
+
+    const signature = new Uint8Array(base64ToArrayBuffer(json.signature));
+
+    // write signed signature to transaction
+    await transaction.setSignature(Buffer.from(signature));
+
+
+    // check the tx is signed and valid
+    console.log({ isSigned: transaction.isSigned(), isValid: await transaction.isValid() });
+
+    // upload as normal
+    const result = await transaction.upload();
+
+    // const uploader = bundlr.uploader.chunkedUploader;
+    // uploader.on("chunkUpload", (chunkInfo)=>{
+    //   console.log(`Uploaded Chunk number ${chunkInfo.id}, offset of ${chunkInfo.offset}, size ${chunkInfo.size} Bytes, with a total of ${chunkInfo.totalUploaded} bytes uploaded.`);
+    // })
+    // const result = await uploader.uploadTransaction(transaction);
+
+    console.log(result);
+  }
+
+
+
+
   return (
     <div className={styles.container}>
       <Head>
@@ -12,6 +82,12 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
+
+        <h1 onClick={uploadDataBundlr} style={{
+          outline:"5px dashed red",
+          cursor: "pointer"
+        }}>{`Click me to upload "Hello" to Arewave`}</h1>
+        <hr />
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
