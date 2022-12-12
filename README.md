@@ -1,3 +1,18 @@
+# Bundlr Serverside Signed Solana Example
+
+### Setup
+
+- `cp .env.local.example .env.local` 
+- Provide keypair & endpoint in `.env.local`
+- `yarn dev` (Standard next.js app, more instructions below.)
+
+Relevant Files:
+
+- `pages/api/signBundlrTransaction.ts`
+- `pages/index.tsx`
+
+---
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
