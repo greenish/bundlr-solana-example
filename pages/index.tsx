@@ -86,7 +86,7 @@ export default function Home() {
         <h1 onClick={uploadDataBundlr} style={{
           outline:"5px dashed red",
           cursor: "pointer"
-        }}>{`Click me to upload "Hello" to Arewave`}</h1>
+        }}>{`Click me to upload "Hello" to Arweave`}</h1>
         <hr />
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
