@@ -45,9 +45,8 @@ export default function Home() {
       })
     });
     const json = await signed.json();
-    const serverPubkey = new PublicKey(json.pubkey);
 
-    console.log(publicKey.toString(), serverPubkey.toString());
+    console.log(json);
 
     const signature = new Uint8Array(base64ToArrayBuffer(json.signature));
 
@@ -60,12 +59,6 @@ export default function Home() {
 
     // upload as normal
     const result = await transaction.upload();
-
-    // const uploader = bundlr.uploader.chunkedUploader;
-    // uploader.on("chunkUpload", (chunkInfo)=>{
-    //   console.log(`Uploaded Chunk number ${chunkInfo.id}, offset of ${chunkInfo.offset}, size ${chunkInfo.size} Bytes, with a total of ${chunkInfo.totalUploaded} bytes uploaded.`);
-    // })
-    // const result = await uploader.uploadTransaction(transaction);
 
     console.log(result);
   }
